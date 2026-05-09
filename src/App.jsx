@@ -15,7 +15,7 @@ const App = () => {
           <Route path="/apartment" element={<ApartmentPage />} />
          
           {/* Apartment House  Type Routes */}
-          <Route path="/apartment" element={<ApartmentPage />} />
+          <Route path="/" element={<ApartmentPage />} />
           <Route path="/apartment/rental-apartment" element={<RentalApartmentPage />} />
 
           {/* <Route path="/individual/independent-villa" element={<IndependentVillaPage />} />
