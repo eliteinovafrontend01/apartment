@@ -13,18 +13,18 @@ const RentalApartmentFilter = () => {
   const [activeTab, setActiveTab] = useState('Rent');
 
   const tabs = [
-    { id: 'Rent', icon: <DollarSign className="w-5 h-5" />, label: 'Rent' },
-    { id: 'Buy', icon: <Home className="w-5 h-5" />, label: 'Buy' },
-    { id: 'Sell', icon: <TrendingUp className="w-5 h-5" />, label: 'Sell' },
-    { id: 'Lease', icon: <FileText className="w-5 h-5" />, label: 'Lease' }
+    { id: 'Rent', icon: <DollarSign className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5" />, label: 'Rent' },
+    { id: 'Buy', icon: <Home className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5" />, label: 'Buy' },
+    { id: 'Sell', icon: <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5" />, label: 'Sell' },
+    { id: 'Lease', icon: <FileText className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5" />, label: 'Lease' }
   ];
 
   const FilterSection = ({ title, children }) => (
-    <div className="bg-white rounded-2xl shadow-md border border-teal-100 overflow-hidden mb-6">
-      <div className="px-5 py-3 bg-gradient-to-r from-teal-50 to-emerald-50 border-b border-teal-100">
-        <h3 className="font-semibold text-teal-800 text-lg">{title}</h3>
+    <div className="bg-white rounded-xl sm:rounded-2xl shadow-md border border-teal-100 overflow-hidden mb-4 sm:mb-6">
+      <div className="px-3 py-2 sm:px-5 sm:py-3 bg-gradient-to-r from-teal-100 to-emerald-100 border-b border-teal-200">
+        <h3 className="font-semibold text-teal-800 text-sm sm:text-lg">{title}</h3>
       </div>
-      <div className="p-5">
+      <div className="p-3 sm:p-5">
         {children}
       </div>
     </div>
@@ -32,54 +32,54 @@ const RentalApartmentFilter = () => {
 
   // Single line input component - each field takes full width
   const InputField = ({ label, placeholder, type = "text" }) => (
-    <div className="mb-4">
-      <label className="block text-sm font-medium text-teal-700 mb-2">{label}</label>
+    <div className="mb-3 sm:mb-4">
+      <label className="block text-xs sm:text-sm font-medium text-teal-700 mb-1 sm:mb-2">{label}</label>
       <input
         type={type}
         placeholder={placeholder}
-        className="w-full px-4 py-2 rounded-xl border border-teal-200 focus:border-teal-400 focus:outline-none transition-all duration-300 bg-white"
+        className="w-full px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg sm:rounded-xl border border-teal-200 focus:border-teal-400 focus:outline-none transition-all duration-300 bg-white text-sm sm:text-base"
       />
     </div>
   );
 
   const InputRange = ({ label, minPlaceholder, maxPlaceholder }) => (
-    <div className="mb-4">
-      <label className="block text-sm font-medium text-teal-700 mb-2">{label}</label>
-      <div className="flex gap-3">
+    <div className="mb-3 sm:mb-4">
+      <label className="block text-xs sm:text-sm font-medium text-teal-700 mb-1 sm:mb-2">{label}</label>
+      <div className="flex gap-2 sm:gap-3">
         <input
           type="text"
           placeholder={minPlaceholder}
-          className="w-1/2 px-4 py-2 rounded-xl border border-teal-200 focus:border-teal-400 focus:outline-none transition-all duration-300 bg-white"
+          className="w-1/2 px-2 py-1.5 sm:px-4 sm:py-2 rounded-lg sm:rounded-xl border border-teal-200 focus:border-teal-400 focus:outline-none transition-all duration-300 bg-white text-sm sm:text-base"
         />
         <input
           type="text"
           placeholder={maxPlaceholder}
-          className="w-1/2 px-4 py-2 rounded-xl border border-teal-200 focus:border-teal-400 focus:outline-none transition-all duration-300 bg-white"
+          className="w-1/2 px-2 py-1.5 sm:px-4 sm:py-2 rounded-lg sm:rounded-xl border border-teal-200 focus:border-teal-400 focus:outline-none transition-all duration-300 bg-white text-sm sm:text-base"
         />
       </div>
     </div>
   );
 
   const SelectInput = ({ label, options }) => (
-    <div className="mb-4">
-      <label className="block text-sm font-medium text-teal-700 mb-2">{label}</label>
-      <select className="w-full px-4 py-2 rounded-xl border border-teal-200 focus:border-teal-400 focus:outline-none transition-all duration-300 bg-white text-teal-800">
-        <option value="">Select {label}</option>
+    <div className="mb-3 sm:mb-4">
+        <label className="block text-xs sm:text-sm font-medium text-teal-700 mb-1 sm:mb-2">{label}</label>
+        <select className="w-full px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg sm:rounded-xl border border-teal-200 focus:border-teal-400 focus:outline-none transition-all duration-300 bg-white text-teal-800 text-sm sm:text-base">
+        <option value="" className="bg-teal-500 text-white">Select {label}</option>
         {options.map(opt => (
-          <option key={opt} value={opt}>{opt}</option>
+            <option key={opt} value={opt} className="bg-white text-teal-800 checked:bg-teal-600 checked:text-white">{opt}</option>
         ))}
-      </select>
+        </select>
     </div>
-  );
+    );
 
   const RadioGroup = ({ label, options }) => (
-    <div className="mb-4">
-      <label className="block text-sm font-medium text-teal-700 mb-2">{label}</label>
-      <div className="flex flex-wrap gap-4">
+    <div className="mb-3 sm:mb-4">
+      <label className="block text-xs sm:text-sm font-medium text-teal-700 mb-1 sm:mb-2">{label}</label>
+      <div className="flex flex-wrap gap-2 sm:gap-4">
         {options.map(opt => (
-          <label key={opt} className="flex items-center gap-2 cursor-pointer">
-            <input type="radio" name={label} className="text-teal-600" />
-            <span className="text-sm text-teal-700">{opt}</span>
+          <label key={opt} className="flex items-center gap-1 sm:gap-2 cursor-pointer">
+            <input type="radio" name={label} className="text-teal-600 w-3 h-3 sm:w-4 sm:h-4" />
+            <span className="text-xs sm:text-sm text-teal-700">{opt}</span>
           </label>
         ))}
       </div>
@@ -87,13 +87,13 @@ const RentalApartmentFilter = () => {
   );
 
   const CheckboxGroup = ({ label, options }) => (
-    <div className="mb-4">
-      <label className="block text-sm font-medium text-teal-700 mb-3">{label}</label>
-      <div className="space-y-2">
+    <div className="mb-3 sm:mb-4">
+      <label className="block text-xs sm:text-sm font-medium text-teal-700 mb-2 sm:mb-3">{label}</label>
+      <div className="space-y-1.5 sm:space-y-2">
         {options.map(option => (
-          <label key={option} className="flex items-center gap-2 cursor-pointer group">
-            <input type="checkbox" className="w-4 h-4 rounded border-teal-300 text-teal-600 focus:ring-teal-500" />
-            <span className="text-sm text-teal-700 group-hover:text-teal-900 transition-colors">{option}</span>
+          <label key={option} className="flex items-center gap-1.5 sm:gap-2 cursor-pointer group">
+            <input type="checkbox" className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded border-teal-300 text-teal-600 focus:ring-teal-500" />
+            <span className="text-xs sm:text-sm text-teal-700 group-hover:text-teal-900 transition-colors">{option}</span>
           </label>
         ))}
       </div>
@@ -102,13 +102,13 @@ const RentalApartmentFilter = () => {
 
   // Location Search Section
   const LocationSearch = () => (
-    <div className="bg-white rounded-2xl shadow-md border border-teal-100 p-5 mb-6">
+    <div className="bg-white rounded-2xl sm:rounded-3xl shadow-md border border-teal-100 p-3 sm:p-5 mb-4 sm:mb-6">
       <div className="relative">
-        <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-teal-400" />
+        <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-teal-400" />
         <input
           type="text"
           placeholder="Search for city, locality, landmark, or PIN code..."
-          className="w-full pl-10 pr-4 py-3 rounded-xl border border-teal-200 focus:border-teal-400 focus:outline-none transition-all duration-300 bg-white text-teal-800"
+          className="w-full pl-8 sm:pl-10 pr-3 sm:pr-4 py-2 sm:py-3 rounded-lg sm:rounded-xl border border-teal-200 focus:border-teal-400 focus:outline-none transition-all duration-300 bg-white text-teal-800 text-sm sm:text-base"
         />
       </div>
     </div>
@@ -134,22 +134,22 @@ const RentalApartmentFilter = () => {
     <>
       <SelectInput label="Furnishing" options={['Fully Furnished', 'Semi-Furnished', 'Unfurnished']} />
       <InputField label="Appliances Included" placeholder="e.g., Refrigerator, AC, Washing Machine, Microwave" />
-      <div className="space-y-2 mt-2">
-        <label className="flex items-center gap-2 cursor-pointer group">
-          <input type="checkbox" className="w-4 h-4 rounded border-teal-300 text-teal-600 focus:ring-teal-500" />
-          <span className="text-sm text-teal-700 group-hover:text-teal-900 transition-colors">Modular Kitchen</span>
+      <div className="space-y-1.5 sm:space-y-2 mt-2">
+        <label className="flex items-center gap-1.5 sm:gap-2 cursor-pointer group">
+          <input type="checkbox" className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded border-teal-300 text-teal-600 focus:ring-teal-500" />
+          <span className="text-xs sm:text-sm text-teal-700 group-hover:text-teal-900 transition-colors">Modular Kitchen</span>
         </label>
-        <label className="flex items-center gap-2 cursor-pointer group">
-          <input type="checkbox" className="w-4 h-4 rounded border-teal-300 text-teal-600 focus:ring-teal-500" />
-          <span className="text-sm text-teal-700 group-hover:text-teal-900 transition-colors">Air Conditioning</span>
+        <label className="flex items-center gap-1.5 sm:gap-2 cursor-pointer group">
+          <input type="checkbox" className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded border-teal-300 text-teal-600 focus:ring-teal-500" />
+          <span className="text-xs sm:text-sm text-teal-700 group-hover:text-teal-900 transition-colors">Air Conditioning</span>
         </label>
-        <label className="flex items-center gap-2 cursor-pointer group">
-          <input type="checkbox" className="w-4 h-4 rounded border-teal-300 text-teal-600 focus:ring-teal-500" />
-          <span className="text-sm text-teal-700 group-hover:text-teal-900 transition-colors">Wardrobes</span>
+        <label className="flex items-center gap-1.5 sm:gap-2 cursor-pointer group">
+          <input type="checkbox" className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded border-teal-300 text-teal-600 focus:ring-teal-500" />
+          <span className="text-xs sm:text-sm text-teal-700 group-hover:text-teal-900 transition-colors">Wardrobes</span>
         </label>
-        <label className="flex items-center gap-2 cursor-pointer group">
-          <input type="checkbox" className="w-4 h-4 rounded border-teal-300 text-teal-600 focus:ring-teal-500" />
-          <span className="text-sm text-teal-700 group-hover:text-teal-900 transition-colors">Utility Area</span>
+        <label className="flex items-center gap-1.5 sm:gap-2 cursor-pointer group">
+          <input type="checkbox" className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded border-teal-300 text-teal-600 focus:ring-teal-500" />
+          <span className="text-xs sm:text-sm text-teal-700 group-hover:text-teal-900 transition-colors">Utility Area</span>
         </label>
       </div>
     </>
@@ -157,11 +157,11 @@ const RentalApartmentFilter = () => {
 
   // Common Amenities Section
   const AmenitiesSection = () => (
-    <div className="space-y-2">
+    <div className="space-y-1.5 sm:space-y-2">
       {['Parking', 'Lift', '24/7 Security', 'CCTV Surveillance', 'Power Backup', 'Swimming Pool', 'Gym', 'Clubhouse', "Children's Play Area", 'Wi-Fi / Broadband Ready'].map(amenity => (
-        <label key={amenity} className="flex items-center gap-2 cursor-pointer group">
-          <input type="checkbox" className="w-4 h-4 rounded border-teal-300 text-teal-600 focus:ring-teal-500" />
-          <span className="text-sm text-teal-700 group-hover:text-teal-900 transition-colors">{amenity}</span>
+        <label key={amenity} className="flex items-center gap-1.5 sm:gap-2 cursor-pointer group">
+          <input type="checkbox" className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded border-teal-300 text-teal-600 focus:ring-teal-500" />
+          <span className="text-xs sm:text-sm text-teal-700 group-hover:text-teal-900 transition-colors">{amenity}</span>
         </label>
       ))}
     </div>
@@ -169,11 +169,11 @@ const RentalApartmentFilter = () => {
 
   // Common Nearby Access Section
   const NearbyAccessSection = () => (
-    <div className="space-y-2">
+    <div className="space-y-1.5 sm:space-y-2">
       {['School', 'Hospital', 'Metro / Bus Stop', 'Shopping Mall / Market', 'IT Park / Office Hub', 'Restaurants'].map(place => (
-        <label key={place} className="flex items-center gap-2 cursor-pointer group">
-          <input type="checkbox" className="w-4 h-4 rounded border-teal-300 text-teal-600 focus:ring-teal-500" />
-          <span className="text-sm text-teal-700 group-hover:text-teal-900 transition-colors">{place}</span>
+        <label key={place} className="flex items-center gap-1.5 sm:gap-2 cursor-pointer group">
+          <input type="checkbox" className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded border-teal-300 text-teal-600 focus:ring-teal-500" />
+          <span className="text-xs sm:text-sm text-teal-700 group-hover:text-teal-900 transition-colors">{place}</span>
         </label>
       ))}
     </div>
@@ -378,37 +378,37 @@ const RentalApartmentFilter = () => {
   return (
     <div className="bg-gradient-to-br from-teal-50 via-white to-emerald-50 min-h-screen">
       {/* Header */}
-      <div className="bg-white shadow-sm border-b border-teal-100 sticky top-0 z-50">
-        <div className="px-6 py-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-gradient-to-r from-teal-600 to-emerald-600 rounded-xl shadow-lg">
-              <Filter className="w-5 h-5 text-white" />
+      <div className="bg-gradient-to-r from-teal-600 to-emerald-600 shadow-sm sticky top-0 z-50">
+        <div className="px-3 py-2 sm:px-6 sm:py-4">
+            <div className="flex items-center gap-2 sm:gap-3">
+            <div className="p-1.5 sm:p-2 bg-white/20 rounded-lg sm:rounded-xl shadow-lg">
+                <Filter className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
             </div>
-            <h1 className="text-xl font-bold bg-gradient-to-r from-teal-700 to-emerald-700 bg-clip-text text-transparent">
-              Rental Apartment Filters
+            <h1 className="text-base sm:text-xl font-bold text-white">
+                Rental Apartment Filters
             </h1>
-          </div>
+            </div>
         </div>
-      </div>
+        </div>
 
       {/* Main Content */}
-      <div className="max-w-4xl mx-auto px-6 py-6">
+      <div className="max-w-4xl mx-auto px-3 sm:px-6 py-4 sm:py-6">
         
         {/* Location Search Bar */}
         <LocationSearch />
 
-        {/* Tabs - Rent, Buy, Sell, Lease - Inline with larger text */}
-        <div className="mb-8">
-          <div className="flex gap-3 bg-teal-50/80 p-1 rounded-2xl inline-flex">
+        {/* Tabs - Rent, Buy, Sell, Lease - Separate light background for each tab */}
+        <div className="mb-6 sm:mb-8">
+          <div className="flex flex-wrap justify-center gap-2 sm:gap-3">
             {tabs.map(tab => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2 px-8 py-3 rounded-xl font-bold text-base transition-all duration-300 ${
+                className={`flex items-center gap-0.5 xs:gap-0.6 sm:gap-1 px-1 xs:px-1 sm:px-3 md:px-3 lg:px-2 py-1 xs:py-1 sm:py-1.4 md:py-2 rounded-lg sm:rounded-xl font-bold transition-all duration-300 whitespace-nowrap ${
                   activeTab === tab.id
                     ? 'bg-gradient-to-r from-teal-600 to-emerald-600 text-white shadow-md'
-                    : 'text-teal-700 hover:bg-teal-100/50'
-                }`}
+                    : 'bg-teal-100 text-teal-700 hover:bg-teal-200'
+                } text-xs sm:text-sm md:text-base`}
               >
                 {tab.icon}
                 <span>{tab.label}</span>
@@ -424,13 +424,13 @@ const RentalApartmentFilter = () => {
         {activeTab === 'Lease' && renderLeaseFilters()}
 
         {/* Action Buttons - Clear and Search at Bottom */}
-        <div className="flex gap-4 sticky bottom-0 bg-gradient-to-br from-teal-50 via-white to-emerald-50 py-4 mt-6 rounded-2xl">
-          <button className="flex-1 px-6 py-3 rounded-xl bg-white border-2 border-teal-200 text-teal-700 font-semibold hover:bg-teal-50 transition-all duration-300">
-            Clear All Filters
+        <div className="flex gap-2 sm:gap-3 sticky bottom-0 bg-gradient-to-br from-teal-50 via-white to-emerald-50 py-3 sm:py-3 mt-4 sm:mt-6 rounded-lg sm:rounded-2xl">
+          <button className="flex-1 px-3 py-2 sm:px-6 sm:py-3 rounded-lg sm:rounded-xl bg-white border border-teal-200 text-teal-700 font-semibold hover:bg-teal-50 transition-all duration-300 text-xs sm:text-sm md:text-base">
+            Clear All
           </button>
-          <button className="flex-1 px-6 py-3 rounded-xl bg-gradient-to-r from-teal-600 to-emerald-600 text-white font-semibold hover:shadow-lg transition-all duration-300 hover:scale-105 flex items-center justify-center gap-2">
-            <Search className="w-4 h-4" />
-            Search Properties
+          <button className="flex-1 px-3 py-2 sm:px-6 sm:py-3 rounded-lg sm:rounded-xl bg-gradient-to-r from-teal-600 to-emerald-600 text-white font-semibold hover:shadow-lg transition-all duration-300 hover:scale-105 flex items-center justify-center gap-1 sm:gap-2 text-xs sm:text-sm md:text-base">
+            <Search className="w-3 h-3 sm:w-4 sm:h-4" />
+            Apply Filters
           </button>
         </div>
       </div>
