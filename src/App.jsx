@@ -2,6 +2,7 @@ import React from 'react'
 import {BrowserRouter,Routes,Route}  from 'react-router-dom';
 import ApartmentPage from './pages/ApartmentPage';
 import RentalApartmentPage from './pages/RentalApartmentPage';
+import ServicedApartmentPage from './pages/ServicedApartmentPage';
 
 const App = () => {
   return (
@@ -17,11 +18,7 @@ const App = () => {
           {/* Apartment House  Type Routes */}
           <Route path="/" element={<ApartmentPage />} />
           <Route path="/apartment/rental-apartment" element={<RentalApartmentPage />} />
-
-          {/* <Route path="/individual/independent-villa" element={<IndependentVillaPage />} />
-          <Route path="/individual/residential-apartment" element={<ResidentialApartmentPage />} />
-          <Route path="/individual/duplex-residential-unit" element={<DuplexResidentialUnitPage />} />
-          <Route path="/individual/row-house" element={<RowHousePage />} /> */}
+          <Route path="/apartment/serviced-apartment" element={<ServicedApartmentPage />} />
 
         </Routes>
      </BrowserRouter> 
