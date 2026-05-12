@@ -6,9 +6,133 @@ import {
   FileText, CheckCircle, AlertCircle, Car, Shield, 
   Wind, Coffee, Droplet, Layers, Layout,
   Smartphone, Mail, Phone, MessageCircle, Globe,
-  Sun, Sunset, Compass, Hash, Box, Scissors
+  Sun, Sunset, Compass, Hash, Box, Scissors,
+  ChevronLeft, ChevronRight
 } from 'lucide-react';
 
+// ── Small Teal Calendar Popup (input unchanged, popup is teal-themed) ────────
+const DAYS = ['Su','Mo','Tu','We','Th','Fr','Sa'];
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+const ThemedDatePicker = ({ label }) => {
+  const today = new Date();
+  const [open, setOpen] = useState(false);
+  const [viewYear, setViewYear] = useState(today.getFullYear());
+  const [viewMonth, setViewMonth] = useState(today.getMonth());
+  const [selected, setSelected] = useState(null);
+  const ref = useRef(null);
+  const inputRef = useRef(null);
+
+  useEffect(() => {
+    const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  // Sync selected date into the hidden native input
+  useEffect(() => {
+    if (inputRef.current && selected) {
+      const y = selected.getFullYear();
+      const m = String(selected.getMonth()+1).padStart(2,'0');
+      const d = String(selected.getDate()).padStart(2,'0');
+      inputRef.current.value = `${y}-${m}-${d}`;
+    }
+  }, [selected]);
+
+  const prevMonth = () => { if (viewMonth===0){setViewMonth(11);setViewYear(y=>y-1);}else setViewMonth(m=>m-1); };
+  const nextMonth = () => { if (viewMonth===11){setViewMonth(0);setViewYear(y=>y+1);}else setViewMonth(m=>m+1); };
+
+  const firstDay = new Date(viewYear, viewMonth, 1).getDay();
+  const daysInMonth = new Date(viewYear, viewMonth+1, 0).getDate();
+
+  const isToday = (d) => d===today.getDate() && viewMonth===today.getMonth() && viewYear===today.getFullYear();
+  const isSelected = (d) => selected && d===selected.getDate() && viewMonth===selected.getMonth() && viewYear===selected.getFullYear();
+
+  const cells = [];
+  for (let i=0; i<firstDay; i++) cells.push(null);
+  for (let d=1; d<=daysInMonth; d++) cells.push(d);
+
+  return (
+    <div className="mb-1.5 sm:mb-2 relative" ref={ref}>
+      <label className="block text-xs sm:text-sm font-bold text-teal-800 mb-0.5 sm:mb-1">{label}</label>
+
+      {/* Native input — untouched styling, just opens our popup on click */}
+      <input
+        ref={inputRef}
+        type="date"
+        onFocus={() => setOpen(true)}
+        onClick={(e) => { e.preventDefault(); setOpen(true); }}
+        onKeyDown={(e) => e.preventDefault()}
+        className="w-full px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-lg sm:rounded-xl border-2 border-teal-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500 focus:outline-none transition-all duration-300 bg-white text-xs sm:text-sm cursor-pointer"
+        readOnly
+      />
+
+      {/* Small teal calendar popup */}
+      {open && (
+        <div
+          className="relative left-0 z-[9999] rounded-xl overflow-hidden"
+          style={{
+            top: 'calc(100% + 4px)',
+            width: '220px',
+            boxShadow: '0 8px 24px -4px rgba(13,148,136,0.4), 0 0 0 2px rgba(13,148,136,0.25)',
+          }}
+        >
+          {/* Month/Year header */}
+          <div className="bg-gradient-to-r from-teal-600 to-emerald-600 flex items-center justify-between px-2 py-1">
+            <button type="button" onClick={prevMonth} className="p-0.5 rounded hover:bg-white/20 text-white transition-colors">
+              <ChevronLeft className="w-3 h-3" />
+            </button>
+            <span className="text-white font-bold text-[10px] tracking-wide">
+              {MONTHS[viewMonth].slice(0,3)} {viewYear}
+            </span>
+            <button type="button" onClick={nextMonth} className="p-0.5 rounded hover:bg-white/20 text-white transition-colors">
+              <ChevronRight className="w-3 h-3" />
+            </button>
+          </div>
+
+          {/* Day labels */}
+          <div className="bg-teal-50 grid grid-cols-7 border-b border-teal-100">
+            {DAYS.map(d => (
+              <div key={d} className="text-center text-[8px] font-bold text-teal-600 py-0.5">{d}</div>
+            ))}
+          </div>
+
+          {/* Date grid */}
+          <div className="bg-white grid grid-cols-7 p-1 gap-0.5">
+            {cells.map((day, idx) => {
+              if (!day) return <div key={`e-${idx}`} />;
+              const sel = isSelected(day);
+              const tod = isToday(day);
+              return (
+                <button
+                  key={day}
+                  type="button"
+                  onClick={() => { setSelected(new Date(viewYear, viewMonth, day)); setOpen(false); }}
+                  className={`w-full rounded text-[9px] font-semibold py-0.5 transition-all duration-150
+                    ${sel ? 'bg-gradient-to-br from-teal-500 to-emerald-500 text-white shadow-sm'
+                          : tod ? 'bg-teal-100 text-teal-700 ring-1 ring-teal-400'
+                               : 'text-teal-800 hover:bg-teal-100'}`}
+                >
+                  {day}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Today / Clear footer */}
+          <div className="bg-teal-50 border-t border-teal-100 flex justify-between px-2 py-0.5">
+            <button type="button" onClick={() => { setSelected(today); setViewMonth(today.getMonth()); setViewYear(today.getFullYear()); setOpen(false); }}
+              className="text-[8px] font-bold text-teal-600 hover:text-teal-800 transition-colors">Today</button>
+            <button type="button" onClick={() => { setSelected(null); if(inputRef.current) inputRef.current.value=''; setOpen(false); }}
+              className="text-[8px] font-bold text-teal-400 hover:text-teal-600 transition-colors">Clear</button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ── Main Component ──────────────────────────────────────────────────────────
 const RentalApartmentFilter = () => {
   const [activeTab, setActiveTab] = useState('Rent');
 
@@ -19,12 +143,11 @@ const RentalApartmentFilter = () => {
     { id: 'Lease', icon: <FileText className="w-3.5 h-3.5 sm:w-4 sm:h-4" />, label: 'Lease' }
   ];
 
-  // FIXED: FilterSection with overflow-visible to prevent dropdown clipping
   const FilterSection = ({ title, children }) => {
     const emoji = title.match(/^\S+/)?.[0] || '';
     const rest = title.slice(emoji.length);
     return (
-      <div className="bg-white rounded-xl sm:rounded-2xl shadow-md border-2 border-teal-100 mb-4 sm:mb-6 transition-all duration-300 hover:shadow-xl hover:shadow-teal-200 hover:-translate-y-1 hover:border-teal-300 overflow-visible relative">
+      <div className="bg-white rounded-xl sm:rounded-2xl shadow-md border-2 border-teal-100 mb-2 sm:mb-3 transition-all duration-300 hover:shadow-xl hover:shadow-teal-200 hover:-translate-y-1 hover:border-teal-300 overflow-visible relative">
         <style>{`
           @keyframes wiggle {
             0%   { transform: rotate(0deg) scale(1); }
@@ -44,13 +167,13 @@ const RentalApartmentFilter = () => {
           .emoji-wrap { display: inline-block; animation: continuousBounce 2s ease-in-out infinite; }
           .emoji-wrap:hover { animation: wiggle 0.6s ease forwards; }
         `}</style>
-        <div className="px-3 py-2 sm:px-5 sm:py-3 bg-gradient-to-r from-teal-100 to-emerald-100 border-b-2 border-teal-200 rounded-t-xl sm:rounded-t-2xl">
-          <h3 className="font-bold text-teal-800 text-base sm:text-lg md:text-xl">
+        <div className="px-2 py-1 sm:px-3 sm:py-1 bg-gradient-to-r from-teal-100 to-emerald-100 border-b-2 border-teal-200 rounded-t-xl sm:rounded-t-2xl">
+          <h3 className="font-bold text-teal-800 text-xs sm:text-sm md:text-base">
             <span className="emoji-wrap">{emoji}</span>
             {rest}
           </h3>
         </div>
-        <div className="p-3 sm:p-5 overflow-visible">
+        <div className="p-1.5 sm:p-2 overflow-visible">
           {children}
         </div>
       </div>
@@ -58,112 +181,53 @@ const RentalApartmentFilter = () => {
   };
 
   const InputField = ({ label, placeholder, type = "text" }) => (
-    <div className="mb-3 sm:mb-4">
-      <label className="block text-xs sm:text-sm font-bold text-teal-800 mb-1 sm:mb-2">{label}</label>
+    <div className="mb-1.5 sm:mb-2">
+      <label className="block text-xs sm:text-sm font-bold text-teal-800 mb-0.5">{label}</label>
       <input
         type={type}
         placeholder={placeholder}
-        className="w-full px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg sm:rounded-xl border-2 border-teal-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500 focus:outline-none transition-all duration-300 bg-white text-xs sm:text-sm"
+        className="w-full px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-lg sm:rounded-xl border-2 border-teal-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500 focus:outline-none transition-all duration-300 bg-white text-xs sm:text-sm"
       />
     </div>
   );
 
   const InputRange = ({ label, minPlaceholder, maxPlaceholder }) => (
-    <div className="mb-3 sm:mb-4">
-      <label className="block text-xs sm:text-sm font-bold text-teal-800 mb-1 sm:mb-2">{label}</label>
+    <div className="mb-1.5 sm:mb-2">
+      <label className="block text-xs sm:text-sm font-bold text-teal-800 mb-0.5">{label}</label>
       <div className="flex gap-2 sm:gap-3">
-        <input
-          type="number"
-          placeholder={minPlaceholder}
-          className="w-1/2 px-2 py-1.5 sm:px-4 sm:py-2 rounded-lg sm:rounded-xl border-2 border-teal-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500 focus:outline-none transition-all duration-300 bg-white text-xs sm:text-sm"
-        />
-        <input
-          type="number"
-          placeholder={maxPlaceholder}
-          className="w-1/2 px-2 py-1.5 sm:px-4 sm:py-2 rounded-lg sm:rounded-xl border-2 border-teal-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500 focus:outline-none transition-all duration-300 bg-white text-xs sm:text-sm"
-        />
+        <input type="number" placeholder={minPlaceholder} className="w-1/2 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-lg sm:rounded-xl border-2 border-teal-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500 focus:outline-none transition-all duration-300 bg-white text-xs sm:text-sm" />
+        <input type="number" placeholder={maxPlaceholder} className="w-1/2 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-lg sm:rounded-xl border-2 border-teal-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500 focus:outline-none transition-all duration-300 bg-white text-xs sm:text-sm" />
       </div>
     </div>
   );
 
   const NumberInputField = ({ label, placeholder }) => (
-    <div className="mb-3 sm:mb-4">
-      <label className="block text-xs sm:text-sm font-bold text-teal-800 mb-1 sm:mb-2">{label}</label>
-      <input
-        type="number"
-        placeholder={placeholder}
-        className="w-full px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg sm:rounded-xl border-2 border-teal-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500 focus:outline-none transition-all duration-300 bg-white text-xs sm:text-sm"
-      />
+    <div className="mb-1.5 sm:mb-2">
+      <label className="block text-xs sm:text-sm font-bold text-teal-800 mb-0.5">{label}</label>
+      <input type="number" placeholder={placeholder} className="w-full px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-lg sm:rounded-xl border-2 border-teal-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500 focus:outline-none transition-all duration-300 bg-white text-xs sm:text-sm" />
     </div>
   );
 
-  // FIXED: SelectInput with proper z-index and no clipping
   const SelectInput = ({ label, options }) => {
     const [open, setOpen] = useState(false);
     const [selected, setSelected] = useState('');
     const ref = useRef(null);
-
     useEffect(() => {
-      const handleClickOutside = (e) => {
-        if (ref.current && !ref.current.contains(e.target)) {
-          setOpen(false);
-        }
-      };
+      const handleClickOutside = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
       document.addEventListener('mousedown', handleClickOutside);
       return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
-
     return (
-      <div className="mb-3 sm:mb-4 relative select-wrapper" ref={ref} style={{ overflow: 'visible' }}>
-        <label className="block text-xs sm:text-sm font-bold text-teal-800 mb-1 sm:mb-2">
-          {label}
-        </label>
-
-        <button
-          type="button"
-          onClick={() => setOpen(!open)}
-          className="w-full px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg sm:rounded-xl border-2 border-teal-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500 focus:outline-none transition-all duration-300 bg-white text-left flex justify-between items-center text-xs sm:text-sm"
-        >
-          <span className={selected ? 'text-teal-800 font-medium' : 'text-gray-400'}>
-            {selected || `Select ${label}`}
-          </span>
-          <svg
-            className={`w-3.5 h-3.5 text-teal-500 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
-            fill="none" viewBox="0 0 24 24" stroke="currentColor"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-          </svg>
+      <div className="mb-1.5 sm:mb-2 relative select-wrapper" ref={ref} style={{ overflow: 'visible' }}>
+        <label className="block text-xs sm:text-sm font-bold text-teal-800 mb-0.5">{label}</label>
+        <button type="button" onClick={() => setOpen(!open)} className="w-full px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-lg sm:rounded-xl border-2 border-teal-200 focus:border-teal-500 focus:ring-2 focus:ring-teal-500 focus:outline-none transition-all duration-300 bg-white text-left flex justify-between items-center text-xs sm:text-sm">
+          <span className={selected ? 'text-teal-800 font-medium' : 'text-gray-400'}>{selected || `Select ${label}`}</span>
+          <svg className={`w-3.5 h-3.5 text-teal-500 transition-transform duration-200 ${open ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
         </button>
-
         {open && (
-          <div 
-            className="dropdown-menu-custom" 
-            style={{
-              position: 'relative',
-              zIndex: 9999,
-              background: 'white',
-              borderRadius: '0.75rem',
-              boxShadow: '0 20px 35px -10px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(13, 148, 136, 0.2)',
-              maxHeight: '260px',
-              overflowY: 'auto',
-              width: '100%',
-              left: '0',
-              top: 'calc(100% + 6px)',
-              
-            }}
-          >
+          <div style={{ position: 'relative', zIndex: 9999, background: 'white', borderRadius: '0.75rem', boxShadow: '0 20px 35px -10px rgba(0,0,0,0.2), 0 0 0 1px rgba(13,148,136,0.2)', maxHeight: '260px', overflowY: 'auto', width: '100%', left: '0', top: 'calc(100% + 4px)' }}>
             {options.map((opt) => (
-              <div
-                key={opt}
-                onClick={() => { setSelected(opt); setOpen(false); }}
-                className={`px-4 py-2 text-xs sm:text-sm cursor-pointer font-medium transition-all duration-150
-                  ${selected === opt
-                    ? 'bg-teal-600 text-white'
-                    : 'text-teal-800 hover:bg-teal-500 hover:text-white'
-                  }`}
-              >
-                {opt}
-              </div>
+              <div key={opt} onClick={() => { setSelected(opt); setOpen(false); }} className={`px-2 py-1 text-xs sm:text-sm cursor-pointer font-medium transition-all duration-150 ${selected === opt ? 'bg-teal-600 text-white' : 'text-teal-800 hover:bg-teal-500 hover:text-white'}`}>{opt}</div>
             ))}
           </div>
         )}
@@ -172,33 +236,26 @@ const RentalApartmentFilter = () => {
   };
 
   const RadioGroup = ({ label, options }) => (
-    <div className="mb-3 sm:mb-4">
-      <label className="block text-xs sm:text-sm font-bold text-teal-800 mb-2 sm:mb-3">{label}</label>
-      <div className="flex flex-wrap gap-3 sm:gap-5">
+    <div className="mb-1.5 sm:mb-2">
+      <label className="block text-xs sm:text-sm font-bold text-teal-800 mb-0.5">{label}</label>
+      <div className="flex flex-wrap gap-1.5 sm:gap-2">
         {options.map(opt => (
-          <label key={opt} className="flex items-center gap-1.5 sm:gap-2 cursor-pointer group">
-            <input 
-              type="radio" 
-              name={label} 
-              className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-teal-600 focus:ring-teal-500 focus:ring-offset-0 checked:bg-teal-600 checked:border-teal-600 accent-teal-600" 
-            />
+          <label key={opt} className="flex items-center gap-1 sm:gap-1.5 cursor-pointer group">
+            <input type="radio" name={label} className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-teal-600 focus:ring-teal-500 focus:ring-offset-0 accent-teal-600" />
             <span className="text-xs sm:text-sm text-teal-700 group-hover:text-teal-600 transition-colors font-medium">{opt}</span>
           </label>
         ))}
       </div>
     </div>
   );
-    
+
   const CheckboxGroup = ({ label, options }) => (
-    <div className="mb-3 sm:mb-4">
-      <label className="block text-xs sm:text-sm font-bold text-teal-800 mb-2 sm:mb-3">{label}</label>
-      <div className="space-y-1.5 sm:space-y-2">
+    <div className="mb-1.5 sm:mb-2">
+      <label className="block text-xs sm:text-sm font-bold text-teal-800 mb-0.5">{label}</label>
+      <div className="space-y-0.5 sm:space-y-1">
         {options.map(option => (
-          <label key={option} className="flex items-center gap-1.5 sm:gap-2 cursor-pointer group">
-            <input 
-              type="checkbox" 
-              className="w-3 h-3 sm:w-3.5 sm:h-3.5 rounded border-2 border-teal-300 text-teal-600 focus:ring-teal-500 focus:ring-offset-0 checked:bg-teal-600 checked:border-teal-600 accent-teal-600" 
-            />
+          <label key={option} className="flex items-center gap-1 sm:gap-1.5 cursor-pointer group">
+            <input type="checkbox" className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded border-2 border-teal-300 text-teal-600 focus:ring-teal-500 focus:ring-offset-0 accent-teal-600" />
             <span className="text-xs sm:text-sm text-teal-700 group-hover:text-teal-600 transition-colors font-medium">{option}</span>
           </label>
         ))}
@@ -223,14 +280,11 @@ const RentalApartmentFilter = () => {
   const InteriorDetailsSection = () => (
     <>
       <SelectInput label="Furnishing" options={['Fully Furnished', 'Semi-Furnished', 'Unfurnished']} />
-      <InputField label="Appliances Included" placeholder="e.g., Refrigerator, AC, Washing Machine, Microwave" />
-      <div className="space-y-1.5 sm:space-y-2 mt-2">
+      <InputField label="Appliances Included" placeholder="e.g., Refrigerator, AC, Washing Machine" />
+      <div className="space-y-0.5 sm:space-y-1 mt-0.5">
         {['Modular Kitchen', 'Air Conditioning', 'Wardrobes', 'Utility Area'].map(item => (
-          <label key={item} className="flex items-center gap-1.5 sm:gap-2 cursor-pointer group">
-            <input 
-              type="checkbox" 
-              className="w-3 h-3 sm:w-3.5 sm:h-3.5 rounded border-2 border-teal-300 text-teal-600 focus:ring-teal-500 focus:ring-offset-0 checked:bg-teal-600 checked:border-teal-600 accent-teal-600" 
-            />
+          <label key={item} className="flex items-center gap-1 sm:gap-1.5 cursor-pointer group">
+            <input type="checkbox" className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded border-2 border-teal-300 text-teal-600 focus:ring-teal-500 focus:ring-offset-0 accent-teal-600" />
             <span className="text-xs sm:text-sm text-teal-700 group-hover:text-teal-600 transition-colors font-medium">{item}</span>
           </label>
         ))}
@@ -239,13 +293,10 @@ const RentalApartmentFilter = () => {
   );
 
   const AmenitiesSection = () => (
-    <div className="space-y-1.5 sm:space-y-2">
+    <div className="space-y-0.5 sm:space-y-1">
       {['Parking', 'Lift', '24/7 Security', 'CCTV Surveillance', 'Power Backup', 'Swimming Pool', 'Gym', 'Clubhouse', "Children's Play Area", 'Wi-Fi / Broadband Ready'].map(amenity => (
-        <label key={amenity} className="flex items-center gap-1.5 sm:gap-2 cursor-pointer group">
-          <input 
-            type="checkbox" 
-            className="w-3 h-3 sm:w-3.5 sm:h-3.5 rounded border-2 border-teal-300 text-teal-600 focus:ring-teal-500 focus:ring-offset-0 checked:bg-teal-600 checked:border-teal-600 accent-teal-600" 
-          />
+        <label key={amenity} className="flex items-center gap-1 sm:gap-1.5 cursor-pointer group">
+          <input type="checkbox" className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded border-2 border-teal-300 text-teal-600 focus:ring-teal-500 focus:ring-offset-0 accent-teal-600" />
           <span className="text-xs sm:text-sm text-teal-700 group-hover:text-teal-600 transition-colors font-medium">{amenity}</span>
         </label>
       ))}
@@ -253,13 +304,10 @@ const RentalApartmentFilter = () => {
   );
 
   const NearbyAccessSection = () => (
-    <div className="space-y-1.5 sm:space-y-2">
+    <div className="space-y-0.5 sm:space-y-1">
       {['School', 'Hospital', 'Metro / Bus Stop', 'Shopping Mall / Market', 'IT Park / Office Hub', 'Restaurants'].map(place => (
-        <label key={place} className="flex items-center gap-1.5 sm:gap-2 cursor-pointer group">
-          <input 
-            type="checkbox" 
-            className="w-3 h-3 sm:w-3.5 sm:h-3.5 rounded border-2 border-teal-300 text-teal-600 focus:ring-teal-500 focus:ring-offset-0 checked:bg-teal-600 checked:border-teal-600 accent-teal-600" 
-          />
+        <label key={place} className="flex items-center gap-1 sm:gap-1.5 cursor-pointer group">
+          <input type="checkbox" className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded border-2 border-teal-300 text-teal-600 focus:ring-teal-500 focus:ring-offset-0 accent-teal-600" />
           <span className="text-xs sm:text-sm text-teal-700 group-hover:text-teal-600 transition-colors font-medium">{place}</span>
         </label>
       ))}
@@ -281,39 +329,22 @@ const RentalApartmentFilter = () => {
         <RadioGroup label="Maintenance Charges Included" options={['Yes', 'No']} />
         <RadioGroup label="Rent Negotiable" options={['Yes', 'No']} />
       </FilterSection>
-
-      <FilterSection title="🏠 Property Details">
-        <PropertyDetailsSection />
-      </FilterSection>
-
-      <FilterSection title="🪑 Interior Details">
-        <InteriorDetailsSection />
-      </FilterSection>
-
+      <FilterSection title="🏠 Property Details"><PropertyDetailsSection /></FilterSection>
+      <FilterSection title="🪑 Interior Details"><InteriorDetailsSection /></FilterSection>
       <FilterSection title="👥 Tenant Preferences">
         <CheckboxGroup label="Tenant Type" options={['Family', 'Bachelor', 'Working Professionals', 'Students']} />
         <RadioGroup label="Pet Friendly" options={['Yes', 'No']} />
         <RadioGroup label="Dietary Preference" options={['Veg Only', 'No Restriction']} />
         <RadioGroup label="Smoking Allowed" options={['Yes', 'No']} />
       </FilterSection>
-
-      <FilterSection title="✨ Amenities">
-        <AmenitiesSection />
-      </FilterSection>
-
+      <FilterSection title="✨ Amenities"><AmenitiesSection /></FilterSection>
       <FilterSection title="📅 Availability">
         <RadioGroup label="Immediate Move-in" options={['Yes', 'No']} />
-        <InputField label="Available From" type="date" placeholder="Select date" />
+        <ThemedDatePicker label="Available From" />
         <SelectInput label="Minimum Rental Duration" options={['3 Months', '6 Months', '1 Year', '2 Years']} />
       </FilterSection>
-
-      <FilterSection title="📍 Nearby Access">
-        <NearbyAccessSection />
-      </FilterSection>
-
-      <FilterSection title="📞 Contact Preference">
-        <ContactPreferenceSection />
-      </FilterSection>
+      <FilterSection title="📍 Nearby Access"><NearbyAccessSection /></FilterSection>
+      <FilterSection title="📞 Contact Preference"><ContactPreferenceSection /></FilterSection>
     </>
   );
 
@@ -326,41 +357,28 @@ const RentalApartmentFilter = () => {
         <RadioGroup label="Loan Required" options={['Yes', 'No', 'Maybe']} />
         <NumberInputField label="Expected Rental Income (Monthly)" placeholder="Enter amount" />
       </FilterSection>
-
       <FilterSection title="🏠 Property Details">
         <PropertyDetailsSection />
         <SelectInput label="Occupancy Status" options={['Vacant', 'Tenant Occupied']} />
         <SelectInput label="Ownership Type" options={['Freehold', 'Leasehold']} />
       </FilterSection>
-
-      <FilterSection title="🪑 Interior Details">
-        <InteriorDetailsSection />
-      </FilterSection>
-
+      <FilterSection title="🪑 Interior Details"><InteriorDetailsSection /></FilterSection>
       <FilterSection title="✨ Amenities">
         <AmenitiesSection />
         <RadioGroup label="Pet Friendly" options={['Yes', 'No']} />
       </FilterSection>
-
       <FilterSection title="📅 Availability">
         <RadioGroup label="Ready to Move" options={['Yes', 'No']} />
         <RadioGroup label="Under Construction" options={['Yes', 'No']} />
         <RadioGroup label="Immediate Possession" options={['Yes', 'No']} />
       </FilterSection>
-
       <FilterSection title="⚖️ Legal Details">
         <RadioGroup label="Title Deed Verified" options={['Yes', 'No']} />
         <RadioGroup label="Loan Eligible" options={['Yes', 'No']} />
         <RadioGroup label="RERA Approved" options={['Yes', 'No']} />
       </FilterSection>
-
-      <FilterSection title="📍 Nearby Access">
-        <NearbyAccessSection />
-      </FilterSection>
-
-      <FilterSection title="📞 Contact Preference">
-        <ContactPreferenceSection />
-      </FilterSection>
+      <FilterSection title="📍 Nearby Access"><NearbyAccessSection /></FilterSection>
+      <FilterSection title="📞 Contact Preference"><ContactPreferenceSection /></FilterSection>
     </>
   );
 
@@ -373,41 +391,28 @@ const RentalApartmentFilter = () => {
         <NumberInputField label="Property Tax (Annual)" placeholder="Enter amount" />
         <NumberInputField label="Current Rental Income (Monthly)" placeholder="Enter amount" />
       </FilterSection>
-
       <FilterSection title="🏠 Property Details">
         <PropertyDetailsSection />
         <SelectInput label="Occupancy Status" options={['Vacant', 'Tenant Occupied']} />
         <SelectInput label="Ownership Type" options={['Freehold', 'Leasehold']} />
       </FilterSection>
-
-      <FilterSection title="🪑 Interior Details">
-        <InteriorDetailsSection />
-      </FilterSection>
-
+      <FilterSection title="🪑 Interior Details"><InteriorDetailsSection /></FilterSection>
       <FilterSection title="✨ Amenities">
         <AmenitiesSection />
         <RadioGroup label="Pet Friendly" options={['Yes', 'No']} />
       </FilterSection>
-
       <FilterSection title="📅 Availability">
         <RadioGroup label="Ready to Move" options={['Yes', 'No']} />
         <RadioGroup label="Under Construction" options={['Yes', 'No']} />
         <RadioGroup label="Immediate Possession" options={['Yes', 'No']} />
       </FilterSection>
-
       <FilterSection title="⚖️ Legal Details">
         <RadioGroup label="Title Deed Verified" options={['Yes', 'No']} />
         <RadioGroup label="Loan Eligible" options={['Yes', 'No']} />
         <RadioGroup label="RERA Approved" options={['Yes', 'No']} />
       </FilterSection>
-
-      <FilterSection title="📍 Nearby Access">
-        <NearbyAccessSection />
-      </FilterSection>
-
-      <FilterSection title="📞 Contact Preference">
-        <ContactPreferenceSection />
-      </FilterSection>
+      <FilterSection title="📍 Nearby Access"><NearbyAccessSection /></FilterSection>
+      <FilterSection title="📞 Contact Preference"><ContactPreferenceSection /></FilterSection>
     </>
   );
 
@@ -420,92 +425,60 @@ const RentalApartmentFilter = () => {
         <RadioGroup label="Maintenance Charges Included" options={['Yes', 'No']} />
         <RadioGroup label="Lease Negotiable" options={['Yes', 'No']} />
       </FilterSection>
-
       <FilterSection title="🏠 Property Details">
         <PropertyDetailsSection />
         <SelectInput label="Ownership Type" options={['Freehold', 'Leasehold']} />
       </FilterSection>
-
-      <FilterSection title="🪑 Interior Details">
-        <InteriorDetailsSection />
-      </FilterSection>
-
+      <FilterSection title="🪑 Interior Details"><InteriorDetailsSection /></FilterSection>
       <FilterSection title="👥 Tenant Preferences">
         <CheckboxGroup label="Tenant Type" options={['Family', 'Bachelor', 'Working Professionals', 'Students']} />
         <RadioGroup label="Pet Friendly" options={['Yes', 'No']} />
         <RadioGroup label="Dietary Preference" options={['Veg Only', 'No Restriction']} />
         <RadioGroup label="Smoking Allowed" options={['Yes', 'No']} />
       </FilterSection>
-
-      <FilterSection title="✨ Amenities">
-        <AmenitiesSection />
-      </FilterSection>
-
+      <FilterSection title="✨ Amenities"><AmenitiesSection /></FilterSection>
       <FilterSection title="📅 Availability">
         <RadioGroup label="Immediate Occupancy" options={['Yes', 'No']} />
-        <InputField label="Available From" type="date" placeholder="Select date" />
+        <ThemedDatePicker label="Available From" />
         <RadioGroup label="Lease Renewal Option" options={['Yes', 'No']} />
       </FilterSection>
-
-      <FilterSection title="📍 Nearby Access">
-        <NearbyAccessSection />
-      </FilterSection>
-
-      <FilterSection title="📞 Contact Preference">
-        <ContactPreferenceSection />
-      </FilterSection>
+      <FilterSection title="📍 Nearby Access"><NearbyAccessSection /></FilterSection>
+      <FilterSection title="📞 Contact Preference"><ContactPreferenceSection /></FilterSection>
     </>
   );
 
   return (
-    // FIXED: Main container - removed overflow-hidden from the flex container, added overflow-hidden only where needed
     <div className="h-screen flex flex-col bg-emerald-50 rounded-3xl" style={{ overflow: 'hidden' }}>
       {/* Sticky Header */}
       <div className="flex-shrink-0 bg-gradient-to-r from-teal-600 to-emerald-600 shadow-sm sticky top-0 z-50">
-        <div className="px-3 py-2 sm:px-6 sm:py-3">
+        <div className="px-3 py-1.5 sm:px-6 sm:py-2">
           <div className="flex items-center gap-2 sm:gap-3">
-            <div className="p-1.5 sm:p-2 bg-white/20 rounded-lg sm:rounded-xl shadow-lg">
+            <div className="p-1 sm:p-1.5 bg-white/20 rounded-lg sm:rounded-xl shadow-lg">
               <style>{`
-                @keyframes slowSpin {
-                  from { transform: rotate(0deg); }
-                  to { transform: rotate(360deg); }
-                }
+                @keyframes slowSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
                 .slow-spin { animation: slowSpin 4s linear infinite; }
               `}</style>
-              <Filter className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white slow-spin" />
+              <Filter className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-white slow-spin" />
             </div>
-            <h1 className="text-base sm:text-lg md:text-xl font-bold text-white">
-              Rental Apartment Filters
-            </h1>
+            <h1 className="text-sm sm:text-base md:text-lg font-bold text-white">Rental Apartment Filters</h1>
           </div>
         </div>
       </div>
 
-      {/* FIXED: Scrollable Content Area - this handles scrolling, but inner elements have overflow-visible */}
+      {/* Scrollable Content */}
       <div className="flex-1 overflow-y-auto" style={{ scrollbarWidth: 'thin', scrollbarColor: '#0d9488 #e5e7eb', position: 'relative', zIndex: 1 }}>
-        <style>
-          {`
-            .overflow-y-auto::-webkit-scrollbar { width: 6px; }
-            .overflow-y-auto::-webkit-scrollbar-track { background: #e5e7eb; border-radius: 10px; }
-            .overflow-y-auto::-webkit-scrollbar-thumb { background: #0d9488; border-radius: 10px; }
-            .overflow-y-auto::-webkit-scrollbar-thumb:hover { background: #0f766e; }
-          `}
-        </style>
-        <div className="max-w-4xl mx-auto px-3 sm:px-6 py-3 sm:py-6 overflow-visible">
-          
+        <style>{`
+          .overflow-y-auto::-webkit-scrollbar { width: 6px; }
+          .overflow-y-auto::-webkit-scrollbar-track { background: #e5e7eb; border-radius: 10px; }
+          .overflow-y-auto::-webkit-scrollbar-thumb { background: #0d9488; border-radius: 10px; }
+          .overflow-y-auto::-webkit-scrollbar-thumb:hover { background: #0f766e; }
+        `}</style>
+        <div className="max-w-4xl mx-auto px-3 sm:px-6 py-1.5 sm:py-3 overflow-visible">
           {/* Tabs */}
-          <div className="sticky top-0 z-40 bg-emerald-50 pt-2 pb-3 -mt-2 mb-4 sm:mb-6 overflow-x-auto">
-            <div className="flex flex-nowrap justify-center gap-0.5 sm:gap-1 md:gap-1.5 min-w-max">
+          <div className="sticky top-0 z-40 bg-emerald-50 pt-1 pb-1.5 -mt-2 mb-2 sm:mb-3 overflow-x-auto">
+            <div className="flex flex-nowrap justify-center gap-0.5 sm:gap-1 md:gap-1 min-w-max">
               {tabs.map(tab => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center gap-1 px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl font-bold transition-all duration-300 whitespace-nowrap ${
-                    activeTab === tab.id
-                      ? 'bg-gradient-to-r from-teal-600 to-emerald-600 text-white shadow-md'
-                      : 'bg-teal-100 text-teal-700 hover:bg-teal-200 hover:text-teal-800'
-                  } text-xs sm:text-sm`}
-                >
+                <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`flex items-center gap-1 px-1.5 sm:px-2 md:px-2.5 py-0.5 sm:py-1 rounded-lg sm:rounded-xl font-bold transition-all duration-300 whitespace-nowrap ${activeTab === tab.id ? 'bg-gradient-to-r from-teal-600 to-emerald-600 text-white shadow-md' : 'bg-teal-100 text-teal-700 hover:bg-teal-200 hover:text-teal-800'} text-xs sm:text-sm`}>
                   {tab.icon}
                   <span>{tab.label}</span>
                 </button>
@@ -513,7 +486,7 @@ const RentalApartmentFilter = () => {
             </div>
           </div>
 
-          {/* Dynamic Filter Content - All sections now have overflow-visible */}
+          {/* Dynamic Filter Content */}
           <div className="overflow-visible">
             {activeTab === 'Rent' && renderRentFilters()}
             {activeTab === 'Buy' && renderBuyFilters()}
@@ -523,14 +496,14 @@ const RentalApartmentFilter = () => {
         </div>
       </div>
 
-      {/* Sticky Bottom Action Buttons */}
-      <div className="flex-shrink-0 bg-gradient-to-br from-teal-50 via-white to-emerald-50 border-t-2 border-teal-100 shadow-lg py-2 sm:py-3 relative z-10">
+      {/* Sticky Bottom Buttons */}
+      <div className="flex-shrink-0 bg-gradient-to-br from-teal-50 via-white to-emerald-50 border-t-2 border-teal-100 shadow-lg py-1 sm:py-1.5 relative z-10">
         <div className="max-w-4xl mx-auto px-3 sm:px-6 flex gap-2 sm:gap-3">
-          <button className="flex-1 px-3 py-1.5 sm:px-6 sm:py-2 rounded-lg sm:rounded-xl bg-white border-2 border-teal-200 text-teal-700 font-semibold hover:bg-teal-600 hover:text-white hover:border-teal-600 transition-all duration-300 text-xs sm:text-sm">
+          <button className="flex-1 px-2 py-0.5 sm:px-3 sm:py-1 rounded-lg sm:rounded-xl bg-white border-2 border-teal-200 text-teal-700 font-semibold hover:bg-teal-600 hover:text-white hover:border-teal-600 transition-all duration-300 text-xs sm:text-sm">
             Clear All
           </button>
-          <button className="flex-1 px-3 py-1.5 sm:px-6 sm:py-2 rounded-lg sm:rounded-xl bg-gradient-to-r from-teal-600 to-emerald-600 text-white font-semibold hover:shadow-lg hover:scale-105 hover:brightness-110 transition-all duration-300 flex items-center justify-center gap-1 sm:gap-2 text-xs sm:text-sm">
-            <Search className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+          <button className="flex-1 px-2 py-0.5 sm:px-3 sm:py-1 rounded-lg sm:rounded-xl bg-gradient-to-r from-teal-600 to-emerald-600 text-white font-semibold hover:shadow-lg hover:scale-105 hover:brightness-110 transition-all duration-300 flex items-center justify-center gap-1 sm:gap-2 text-xs sm:text-sm">
+            <Search className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
             Apply Filters
           </button>
         </div>
